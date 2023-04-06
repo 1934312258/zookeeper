@@ -623,6 +623,7 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
     @Override
     public void configure(InetSocketAddress addr, int maxClientCnxns, int backlog, boolean secure) throws IOException {
         configureSaslLogin();
+        // 最大连接数
         initMaxCnxns();
         localAddress = addr;
         this.maxClientCnxns = maxClientCnxns;

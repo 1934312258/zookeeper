@@ -1132,13 +1132,17 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
         if (!getView().containsKey(myid)) {
             throw new RuntimeException("My id " + myid + " not in the peer list");
         }
+        // 加载日志数据
         loadDataBase();
+        //** 启动nio或者netty工厂
         startServerCnxnFactory();
         try {
+            // 启动四字命令功能
             adminServer.start();
         } catch (AdminServerException e) {
             LOG.warn("Problem starting AdminServer", e);
         }
+        //** 启动选举逻辑
         startLeaderElection();
         startJvmPauseMonitor();
         super.start();
@@ -1358,6 +1362,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
         case 2:
             throw new UnsupportedOperationException("Election Algorithm 2 is not supported.");
         case 3:
+            // 初始化投票数据管理器
             QuorumCnxManager qcm = createCnxnManager();
             QuorumCnxManager oldQcm = qcmRef.getAndSet(qcm);
             if (oldQcm != null) {
@@ -1366,8 +1371,10 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
             }
             QuorumCnxManager.Listener listener = qcm.listener;
             if (listener != null) {
+                //使用线程池创建socket  bio连接各个节点
                 listener.start();
                 FastLeaderElection fle = new FastLeaderElection(this, qcm);
+                //** 启动发送与接受选票线程
                 fle.start();
                 le = fle;
             } else {

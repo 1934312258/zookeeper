@@ -942,6 +942,7 @@ public class FastLeaderElection implements Election {
 
             synchronized (this) {
                 logicalclock.incrementAndGet();
+                // 初始化选票信息
                 updateProposal(getInitId(), getInitLastLoggedZxid(), getPeerEpoch());
             }
 
@@ -949,6 +950,7 @@ public class FastLeaderElection implements Election {
                 "New election. My id = {}, proposed zxid=0x{}",
                 self.getMyId(),
                 Long.toHexString(proposedZxid));
+            //**向发送队列添加选票
             sendNotifications();
 
             SyncedLearnerTracker voteSet = null;
@@ -962,16 +964,19 @@ public class FastLeaderElection implements Election {
                  * Remove next notification from queue, times out after 2 times
                  * the termination time
                  */
+                // 取出选票
                 Notification n = recvqueue.poll(notTimeout, TimeUnit.MILLISECONDS);
 
                 /*
                  * Sends more notifications if haven't received enough.
                  * Otherwise processes new notification.
                  */
+                // 开始启动时队列指定为空,先创建发送选票bio连接
                 if (n == null) {
                     if (manager.haveDelivered()) {
                         sendNotifications();
                     } else {
+                        // 创建链接
                         manager.connectAll();
                     }
 
@@ -1013,15 +1018,19 @@ public class FastLeaderElection implements Election {
                             break;
                         }
                         // If notification > current, replace and send messages out
+                        // 选举轮次大于当前机器的选举轮次,将当前机器的选票信息置空
                         if (n.electionEpoch > logicalclock.get()) {
                             logicalclock.set(n.electionEpoch);
                             recvset.clear();
+                            // 与选票中的机器对比,决定下一轮选票投给哪台机器
                             if (totalOrderPredicate(n.leader, n.zxid, n.peerEpoch, getInitId(), getInitLastLoggedZxid(), getPeerEpoch())) {
                                 updateProposal(n.leader, n.zxid, n.peerEpoch);
                             } else {
                                 updateProposal(getInitId(), getInitLastLoggedZxid(), getPeerEpoch());
                             }
+                            // 发送选票
                             sendNotifications();
+                            // 选举轮次小于当前机器的选举轮次,选票作废
                         } else if (n.electionEpoch < logicalclock.get()) {
                                 LOG.debug(
                                     "Notification election epoch is smaller than logicalclock. n.electionEpoch = 0x{}, logicalclock=0x{}",
@@ -1044,7 +1053,7 @@ public class FastLeaderElection implements Election {
                         recvset.put(n.sid, new Vote(n.leader, n.zxid, n.electionEpoch, n.peerEpoch));
 
                         voteSet = getVoteTracker(recvset, new Vote(proposedLeader, proposedZxid, logicalclock.get(), proposedEpoch));
-
+                        // 判断某台机器的选票是否大于2
                         if (voteSet.hasAllQuorums()) {
 
                             // Verify if there is any change in the proposed leader

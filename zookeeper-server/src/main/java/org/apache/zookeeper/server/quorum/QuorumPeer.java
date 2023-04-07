@@ -1142,7 +1142,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
         } catch (AdminServerException e) {
             LOG.warn("Problem starting AdminServer", e);
         }
-        //** 启动选举逻辑
+        //** 启动选举逻辑,真实的建立bio连接用于接受选票,使用两条线程,一个发送选票,选票从队列中获取,一个接受选票,接到选票之后放入接受选票队列
         startLeaderElection();
         startJvmPauseMonitor();
         super.start();

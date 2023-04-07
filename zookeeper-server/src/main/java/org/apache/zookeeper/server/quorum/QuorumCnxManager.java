@@ -599,6 +599,7 @@ public class QuorumCnxManager {
         MultipleAddresses electionAddr = null;
 
         try {
+            // 读取发送选票机器id
             protocolVersion = din.readLong();
             if (protocolVersion >= 0) { // this is a server id and not a protocol version
                 sid = protocolVersion;
@@ -635,6 +636,7 @@ public class QuorumCnxManager {
         // do authenticating learner
         authServer.authenticate(sock, din);
         //If wins the challenge, then close the new connection.
+        //** 如果id小于本机id,则关闭连接,zk不允许id小的机器连接id大的机器,防止重复连接
         if (sid < self.getMyId()) {
             /*
              * This replica might still believe that the connection to sid is
@@ -663,7 +665,9 @@ public class QuorumCnxManager {
             LOG.warn("We got a connection request from a server with our own ID. "
                      + "This should be either a configuration error, or a bug.");
         } else { // Otherwise start worker threads to receive data.
+            //**发送选票线程
             SendWorker sw = new SendWorker(sock, sid);
+            //**接受选票线程
             RecvWorker rw = new RecvWorker(sock, din, sid, sw);
             sw.setRecv(rw);
 
@@ -1071,6 +1075,7 @@ public class QuorumCnxManager {
                         LOG.info("{} is accepting connections now, my election bind port: {}", QuorumCnxManager.this.mySid, address.toString());
                         while (!shutdown) {
                             try {
+                                //** 建立连接等待连接
                                 client = serverSocket.accept();
                                 setSockOpts(client);
                                 LOG.info("Received connection request from {}", client.getRemoteSocketAddress());

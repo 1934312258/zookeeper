@@ -425,7 +425,9 @@ public class ClientCnxn {
     }
 
     public void start() {
+        //**建立连接后处理读写请求
         sendThread.start();
+        //**回调方法的调用
         eventThread.start();
     }
 
@@ -889,6 +891,7 @@ public class ClientCnxn {
                     eventThread.queueEventOfDeath();
                 }
               return;
+                //**收到数据变化的返回事件
             case NOTIFICATION_XID:
                 LOG.debug("Got notification session id: 0x{}",
                     Long.toHexString(sessionId));
@@ -952,6 +955,7 @@ public class ClientCnxn {
 
                 LOG.debug("Reading reply session id: 0x{}, packet:: {}", Long.toHexString(sessionId), packet);
             } finally {
+                //**收到服务端命令执行完毕返回事件
                 finishPacket(packet);
             }
         }
@@ -1270,7 +1274,7 @@ public class ClientCnxn {
                         }
                         to = Math.min(to, pingRwTimeout - idlePingRwServer);
                     }
-
+                    //**建立连接后监听处理读写事件
                     clientCnxnSocket.doTransport(to, pendingQueue, ClientCnxn.this);
                 } catch (Throwable e) {
                     if (closing) {
@@ -1574,6 +1578,7 @@ public class ClientCnxn {
             } else {
                 // Wait for request completion infinitely
                 while (!packet.finished) {
+                    //** 等待服务端返回
                     packet.wait();
                 }
             }
@@ -1668,9 +1673,11 @@ public class ClientCnxn {
                 if (h.getType() == OpCode.closeSession) {
                     closing = true;
                 }
+                //**放入发送队列,有线程负责发送
                 outgoingQueue.add(packet);
             }
         }
+        //**调用到wakeUp,用于唤醒阻塞在selector上的线程,底层会向管道里写一个字节的数据,用于出发写事件,写事件触发后会将待发送队列中的数据发送给服务端
         sendThread.getClientCnxnSocket().packetAdded();
         return packet;
     }

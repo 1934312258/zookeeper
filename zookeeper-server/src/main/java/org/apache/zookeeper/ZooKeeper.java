@@ -643,7 +643,7 @@ public class ZooKeeper implements AutoCloseable {
         this.clientConfig = clientConfig != null ? clientConfig : new ZKClientConfig();
         this.hostProvider = hostProvider;
         ConnectStringParser connectStringParser = new ConnectStringParser(connectString);
-
+        //**创建链接,使用netty或者nio
         cnxn = createConnection(
             connectStringParser.getChrootPath(),
             hostProvider,
@@ -652,6 +652,7 @@ public class ZooKeeper implements AutoCloseable {
             watcher,
             getClientCnxnSocket(),
             canBeReadOnly);
+        //**客户端启动主流程
         cnxn.start();
     }
 
@@ -1342,6 +1343,7 @@ public class ZooKeeper implements AutoCloseable {
         request.setFlags(createMode.toFlag());
         request.setPath(serverPath);
         request.setAcl(acl);
+        //**
         ReplyHeader r = cnxn.submitRequest(h, request, response, null);
         if (r.getErr() != 0) {
             throw KeeperException.create(KeeperException.Code.get(r.getErr()), clientPath);

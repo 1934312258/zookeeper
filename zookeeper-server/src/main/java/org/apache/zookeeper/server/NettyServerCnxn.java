@@ -373,6 +373,7 @@ public class NettyServerCnxn extends ServerCnxn {
                 appendToQueuedBuffer(buf.retainedDuplicate());
                 processQueuedBuffer();
             } else {
+                //***
                 receiveMessage(buf);
                 // Have to check !closingChannel, because an error in
                 // receiveMessage() could have led to close() being called.

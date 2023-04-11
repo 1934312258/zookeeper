@@ -84,10 +84,13 @@ public class Follower extends Learner {
 
         try {
             self.setZabState(QuorumPeer.ZabState.DISCOVERY);
+            // 寻找主节点
             QuorumServer leaderServer = findLeader();
             try {
+                //使用线程池异步与主节点连接
                 connectToLeader(leaderServer.addr, leaderServer.hostname);
                 connectionTime = System.currentTimeMillis();
+                //**注册到主节点上
                 long newEpochZxid = registerWithLeader(Leader.FOLLOWERINFO);
                 if (self.isReconfigStateChange()) {
                     throw new Exception("learned about role change");
@@ -121,6 +124,7 @@ public class Follower extends Learner {
                 // create a reusable packet to reduce gc impact
                 QuorumPacket qp = new QuorumPacket();
                 while (this.isRunning()) {
+                    //** 读取leader的ping信息，读取不到跳出循环，在上一方法中改变状态未looking，重新选举
                     readPacket(qp);
                     processPacket(qp);
                 }

@@ -1512,6 +1512,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                                 shuttingDownLE = false;
                                 startLeaderElection();
                             }
+                            //** 选票处理入口
                             setCurrentVote(makeLEStrategy().lookForLeader());
                             checkSuspended();
                         } catch (Exception e) {
@@ -1560,12 +1561,14 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                     try {
                         LOG.info("FOLLOWING");
                         setFollower(makeFollower(logFactory));
+                        //**链接主节点，并读取主节点ping信息，如果ping出异常会跳出方法，走到finally的重新选举逻辑
                         follower.followLeader();
                     } catch (Exception e) {
                         LOG.warn("Unexpected exception", e);
                     } finally {
                         follower.shutdown();
                         setFollower(null);
+                        //**将节点状态置为LOOKING重新选举
                         updateServerState();
                     }
                     break;
@@ -1582,6 +1585,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                             leader.shutdown("Forcing shutdown");
                             setLeader(null);
                         }
+                        //**将节点状态置为LOOKING重新选举
                         updateServerState();
                     }
                     break;

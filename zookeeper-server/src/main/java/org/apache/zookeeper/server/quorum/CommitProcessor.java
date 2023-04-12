@@ -219,6 +219,7 @@ public class CommitProcessor extends ZooKeeperCriticalThread implements RequestP
                     if (requestsToProcess == 0 && !commitIsWaiting) {
                         // Waiting for requests to process
                         while (!stopped && requestsToProcess == 0 && !commitIsWaiting) {
+                            //开始没有请求时阻塞等待请求
                             wait();
                             commitIsWaiting = !committedRequests.isEmpty();
                             requestsToProcess = queuedRequests.size();

@@ -483,6 +483,7 @@ public class NettyServerCnxn extends ServerCnxn {
                             RequestHeader h = new RequestHeader();
                             ByteBufferInputStream.byteBuffer2Record(bb, h);
                             RequestRecord request = RequestRecord.fromBytes(bb.slice());
+                            //**
                             zks.processPacket(this, h, request);
                         } else {
                             LOG.debug("got conn req request from {}", getRemoteSocketAddress());

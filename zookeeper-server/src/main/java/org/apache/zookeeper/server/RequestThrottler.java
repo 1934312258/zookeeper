@@ -143,7 +143,7 @@ public class RequestThrottler extends ZooKeeperCriticalThread {
                 if (killed) {
                     break;
                 }
-
+                //**线程启动后在此阻塞等待,直到有请求添加到队列中(比如客户端写数据请求)
                 Request request = submittedRequests.take();
                 if (Request.requestOfDeath == request) {
                     break;
@@ -185,6 +185,7 @@ public class RequestThrottler extends ZooKeeperCriticalThread {
                       request.setIsThrottled(true);
                       ServerMetrics.getMetrics().THROTTLED_OPS.add(1);
                     }
+                    //***提交请求
                     zks.submitRequestNow(request);
                 }
             }

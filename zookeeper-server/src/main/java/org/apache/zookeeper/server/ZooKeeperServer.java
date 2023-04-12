@@ -1225,6 +1225,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
                 LOG.warn("Unexpected interruption", e);
             }
         }
+        //**
         enqueueRequest(si);
     }
 
@@ -1247,6 +1248,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
                 }
             }
         }
+        //**将请求添加到队列中,此时requestThrottler线程正阻塞在获取队列请求中,当添加请求后线程被唤醒,进入线程的run方法逻辑
         requestThrottler.submitRequest(si);
     }
 
@@ -1274,6 +1276,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
             boolean validpacket = Request.isValid(si.type);
             if (validpacket) {
                 setLocalSessionFlag(si);
+                //**进入责任链处理请求
                 firstProcessor.processRequest(si);
                 if (si.cnxn != null) {
                     incInProcess();
@@ -1761,6 +1764,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
                     si.setLargeRequestSize(length);
                 }
                 si.setOwner(ServerCnxn.me);
+                //**往队列中添加请求
                 submitRequest(si);
             }
         }

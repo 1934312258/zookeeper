@@ -926,6 +926,7 @@ public class Leader extends LearnerMaster {
         // in order to be committed, a proposal must be accepted by a quorum.
         //
         // getting a quorum from all necessary configurations.
+        //检查是否可以提交,最终的比对方案还是是否有超过一半节点返回了ack
         if (!p.hasAllQuorums()) {
             return false;
         }
@@ -1039,9 +1040,9 @@ public class Leader extends LearnerMaster {
         if (ackLoggingFrequency > 0 && (zxid % ackLoggingFrequency == 0)) {
             p.request.logLatency(ServerMetrics.getMetrics().ACK_LATENCY, Long.toString(sid));
         }
-
+        //**主节点将自己的ack加入集合
         p.addAck(sid);
-
+        //**尝试commit
         boolean hasCommitted = tryToCommit(p, zxid, followerAddr);
 
         // If p is a reconfiguration, multiple other operations may be ready to be committed,

@@ -150,6 +150,7 @@ public class WatchManager implements IWatchManager {
                     }
                 }
                 if (thisWatchers.isEmpty()) {
+                    //监听只处理一次,故而删除
                     watchTable.remove(localPath);
                 }
             }
@@ -165,6 +166,7 @@ public class WatchManager implements IWatchManager {
             if (supress != null && supress.contains(w)) {
                 continue;
             }
+            //***处理监听NettyServerCnxn
             w.process(e);
         }
 

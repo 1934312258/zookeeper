@@ -108,6 +108,7 @@ public class FinalRequestProcessor implements RequestProcessor {
     }
 
     private ProcessTxnResult applyRequest(Request request) {
+        //**
         ProcessTxnResult rc = zks.processTxn(request);
 
         // ZOOKEEPER-558:
@@ -155,6 +156,7 @@ public class FinalRequestProcessor implements RequestProcessor {
         }
         ProcessTxnResult rc = null;
         if (!request.isThrottled()) {
+            //**处理请求
           rc = applyRequest(request);
         }
         if (request.cnxn == null) {
@@ -297,6 +299,7 @@ public class FinalRequestProcessor implements RequestProcessor {
             }
             case OpCode.create: {
                 lastOp = "CREA";
+                //**创建返回对象
                 rsp = new CreateResponse(rc.path);
                 err = Code.get(rc.err);
                 requestPathMetricsCollector.registerRequest(request.type, rc.path);
@@ -603,6 +606,7 @@ public class FinalRequestProcessor implements RequestProcessor {
                         break;
                     }
                     default:
+                        //**给客户端返回结果
                         responseSize = cnxn.sendResponse(hdr, rsp, "response");
                 }
             }

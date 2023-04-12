@@ -1879,6 +1879,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
             return new ProcessTxnResult();
         }
         synchronized (outstandingChanges) {
+            //**
             ProcessTxnResult rc = processTxnInDB(hdr, request.getTxn(), request.getTxnDigest());
 
             // request.hdr is set for write requests, which are the only ones
@@ -1929,6 +1930,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         if (hdr == null) {
             return new ProcessTxnResult();
         } else {
+            //**更新内存数据
             return getZKDatabase().processTxn(hdr, txn, digest);
         }
     }

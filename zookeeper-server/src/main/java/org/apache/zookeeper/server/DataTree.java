@@ -518,6 +518,7 @@ public class DataTree {
             updateQuotaStat(lastPrefix, bytes, 1);
         }
         updateWriteStat(path, bytes);
+        //**触发节点变动通知
         dataWatches.triggerWatch(path, Event.EventType.NodeCreated);
         childWatches.triggerWatch(parentName.equals("") ? "/" : parentName, Event.EventType.NodeChildrenChanged);
     }
@@ -835,6 +836,7 @@ public class DataTree {
     public volatile long lastProcessedZxid = 0;
 
     public ProcessTxnResult processTxn(TxnHeader header, Record txn, TxnDigest digest) {
+        //**
         ProcessTxnResult result = processTxn(header, txn);
         compareDigest(header, txn, digest);
         return result;
@@ -858,6 +860,7 @@ public class DataTree {
             case OpCode.create:
                 CreateTxn createTxn = (CreateTxn) txn;
                 rc.path = createTxn.getPath();
+                //**写内存数据
                 createNode(
                     createTxn.getPath(),
                     createTxn.getData(),

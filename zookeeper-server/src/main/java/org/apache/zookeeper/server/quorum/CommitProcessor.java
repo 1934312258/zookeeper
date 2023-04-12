@@ -218,6 +218,8 @@ public class CommitProcessor extends ZooKeeperCriticalThread implements RequestP
                     requestsToProcess = queuedRequests.size();
                     if (requestsToProcess == 0 && !commitIsWaiting) {
                         // Waiting for requests to process
+                        //**当ProposalRequestProcessor处理完请求,数据提交命令发送给主节点后会给committedRequests添加一条请求,同时唤醒当前线程
+                        //当前线程的主要职责是调用责任链的下一链条ToBeAppliedRequestProcessor
                         while (!stopped && requestsToProcess == 0 && !commitIsWaiting) {
                             //开始没有请求时阻塞等待请求
                             wait();

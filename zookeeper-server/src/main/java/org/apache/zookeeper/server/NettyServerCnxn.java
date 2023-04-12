@@ -174,6 +174,7 @@ public class NettyServerCnxn extends ServerCnxn {
         WatcherEvent e = event.getWrapper();
 
         try {
+            ///**节点变动通知会发送给客户端,由客户端监听处理
             int responseSize = sendResponse(h, e, "notification");
             ServerMetrics.getMetrics().WATCH_BYTES.add(responseSize);
         } catch (IOException e1) {

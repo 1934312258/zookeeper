@@ -979,9 +979,12 @@ public class Leader extends LearnerMaster {
             informAndActivate(p, designatedLeader);
         } else {
             p.request.logLatency(ServerMetrics.getMetrics().QUORUM_ACK_LATENCY);
+            //**给所有从节点发送提交命令
             commit(zxid);
+            //**将数据同步到observer
             inform(p);
         }
+        //**向队列添加commit请求,并唤醒CommitProcessor的等待线程
         zk.commitProcessor.commit(p.request);
         if (pendingSyncs.containsKey(zxid)) {
             for (LearnerSyncRequest r : pendingSyncs.remove(zxid)) {

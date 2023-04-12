@@ -607,6 +607,7 @@ public class LearnerHandler extends ZooKeeperThread {
             bufferedOutput.flush();
 
             // Start thread that blast packets in the queue to learner
+            //**启动线程发送主节点commit命令与同步数据给observer命令
             startSendingPackets();
 
             /*

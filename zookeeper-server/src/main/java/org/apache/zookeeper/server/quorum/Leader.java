@@ -296,7 +296,7 @@ public class Leader extends LearnerMaster {
         } else {
             addresses = self.getQuorumAddress().getAllAddresses();
         }
-
+        //创建socket并绑定与从节点通信端口供从节点连接
         addresses.stream()
           .map(address -> createServerSocket(address, self.shouldUsePortUnification(), self.isSslQuorum()))
           .filter(Optional::isPresent)
@@ -522,6 +522,7 @@ public class Leader extends LearnerMaster {
                     socket.setTcpNoDelay(nodelay);
 
                     BufferedInputStream is = new BufferedInputStream(socket.getInputStream());
+                    //启动新线程用于与从节点数据同步
                     LearnerHandler fh = new LearnerHandler(socket, is, Leader.this);
                     fh.start();
                 } catch (SocketException e) {
@@ -594,12 +595,14 @@ public class Leader extends LearnerMaster {
         try {
             self.setZabState(QuorumPeer.ZabState.DISCOVERY);
             self.tick.set(0);
+            // 加载数据到内存
             zk.loadData();
 
             leaderStateSummary = new StateSummary(self.getCurrentEpoch(), zk.getLastProcessedZxid());
 
             // Start thread that waits for connection requests from
             // new followers.
+            //** 使用新线程与从节点同步数据
             cnxAcceptor = new LearnerCnxAcceptor();
             cnxAcceptor.start();
 
@@ -688,7 +691,7 @@ public class Leader extends LearnerMaster {
                 }
                 return;
             }
-
+            //**构建leader请求链
             startZkServer();
 
             /**
@@ -780,6 +783,7 @@ public class Leader extends LearnerMaster {
                      * the size of outstandingProposals can be 1. The only one outstanding proposal is the one waiting for the ACK from
                      * the leader itself.
                      * */
+                    //ping消息ack回复小于节点数量的一半时跳出循环，回到上一个方法，将自己置为looking状态，重新选举leader
                     if (!tickSkip && !syncedAckSet.hasAllQuorums()
                         && !(self.getQuorumVerifier().overrideQuorumDecision(getForwardingFollowers()) && self.getQuorumVerifier().revalidateOutstandingProp(this, new ArrayList<>(outstandingProposals.values()), lastCommitted))) {
                         // Lost quorum of last committed and/or last proposed
@@ -791,6 +795,7 @@ public class Leader extends LearnerMaster {
                     }
                     tickSkip = !tickSkip;
                 }
+                //给从节点发送ping消息
                 for (LearnerHandler f : getLearners()) {
                     f.ping();
                 }

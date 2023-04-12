@@ -810,6 +810,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
             createSessionTracker();
         }
         startSessionTracker();
+        // 构建leader请求链
         setupRequestProcessors();
 
         startRequestThrottler();

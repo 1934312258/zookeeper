@@ -941,6 +941,7 @@ public class FastLeaderElection implements Election {
             int notTimeout = minNotificationInterval;
 
             synchronized (this) {
+                //选举次数加一
                 logicalclock.incrementAndGet();
                 // 初始化选票信息
                 updateProposal(getInitId(), getInitLastLoggedZxid(), getPeerEpoch());
@@ -1069,6 +1070,7 @@ public class FastLeaderElection implements Election {
                              * relevant message from the reception queue
                              */
                             if (n == null) {
+                                // 设置节点角色，主节点还是从节点
                                 setPeerState(proposedLeader, voteSet);
                                 Vote endVote = new Vote(proposedLeader, proposedZxid, logicalclock.get(), proposedEpoch);
                                 leaveInstance(endVote);

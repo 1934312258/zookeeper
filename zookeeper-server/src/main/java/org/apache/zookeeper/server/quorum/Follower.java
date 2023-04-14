@@ -124,7 +124,7 @@ public class Follower extends Learner {
                 // create a reusable packet to reduce gc impact
                 QuorumPacket qp = new QuorumPacket();
                 while (this.isRunning()) {
-                    //** 读取leader的ping信息，读取不到跳出循环，在上一方法中改变状态未looking，重新选举
+                    //** 读取leader的所有信息，读取不到跳出循环，在上一方法中改变状态为looking，重新选举
                     readPacket(qp);
                     //处理主节点发送过来的消息
                     processPacket(qp);
